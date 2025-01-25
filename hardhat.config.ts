@@ -26,6 +26,13 @@ const config: HardhatUserConfig = {
       accounts:{
         mnemonic:process.env.MNEMONIC
       }
+    },
+    holesky:{
+      url:process.env.HOLEKSY_URL,
+      chainId:17000,
+      accounts:{
+        mnemonic:process.env.MNEMONIC_HOLESKY
+      }
     }
     
   },

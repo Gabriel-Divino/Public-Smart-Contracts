@@ -4,6 +4,10 @@ pragma solidity ^0.8.28;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
+//Link do contrato https://holesky.etherscan.io/address/0xDEbb285bbBd173AB99A9D94AE85Aab904774555b
+//Hash do contrato : 0xDEbb285bbBd173AB99A9D94AE85Aab904774555b
+//Contrato publicado via Hardhat
+
 contract MarketPlace {
 
 
