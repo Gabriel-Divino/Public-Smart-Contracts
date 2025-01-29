@@ -13,13 +13,6 @@ const config: HardhatUserConfig = {
         mnemonic : "test test test test test test test test test test test junk"
       }
     },
-    ganache : {
-      url : "http://127.0.0.1:7545",
-      chainId : 1337,
-      accounts:{
-        mnemonic : process.env.MNEMONIC_GANACHE
-      }
-    },
     sepolia:{
       url:process.env.SEPOLIA_URL,
       chainId:11155111,
@@ -31,7 +24,7 @@ const config: HardhatUserConfig = {
       url:process.env.HOLEKSY_URL,
       chainId:17000,
       accounts:{
-        mnemonic:process.env.MNEMONIC_HOLESKY
+        mnemonic:process.env.MNEMONIC
       }
     }
     
