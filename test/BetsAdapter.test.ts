@@ -37,6 +37,12 @@ describe('BetsApdater',()=>{
         expect(address).to.equal(bets.target);
     })
 
+    it('get Owner', async () =>{
+        const { bets, betsAdapter , owner, account1 , account2 } = await deployFixture();
+        const getOwner = await betsAdapter.getOwner();
+        expect(getOwner).to.equal(owner.address);
+    })
+
     it('setProvider (error : Access denied)',async () =>{
         const { bets, betsAdapter , owner, account1 , account2 } = await deployFixture();
         const instance = betsAdapter.connect(account1);
@@ -170,7 +176,186 @@ describe('BetsApdater',()=>{
         expect(bettors[1].team).to.equal(1);
         
 
-    })  
+    }) 
+
+
+    it('make Bet  (error : Owner Cannot Play)',async () =>{
+        const { bets, betsAdapter , owner, account1 , account2 } = await deployFixture();
+        //console.log(bets.target)
+        await betsAdapter.setProvider(bets.target);
+        const games : TeamInterface[] = [
+            {
+                team1 : "Barcelona",
+                team2 : "Real Madrid"
+            },
+            {
+                team1 : "Manchester City",
+                team2 : "Arsenal"
+            }
+        ]
+
+        await betsAdapter.addGame(games[0].team1,games[0].team2);
+        await betsAdapter.addGame(games[1].team1,games[1].team2);
+
+
+        const value : bigint = ethers.parseEther('0.01');
+        await expect(betsAdapter.makeBet(0,0,{value : value})).to.revertedWith('Owner Cannot Play');
+
+    }) 
+    
+    it('make Bet  (error : Invalid bet: the value must be exactly 0.01 ether)',async () =>{
+        const { bets, betsAdapter , owner, account1 , account2 } = await deployFixture();
+        //console.log(bets.target)
+        await betsAdapter.setProvider(bets.target);
+        const games : TeamInterface[] = [
+            {
+                team1 : "Barcelona",
+                team2 : "Real Madrid"
+            },
+            {
+                team1 : "Manchester City",
+                team2 : "Arsenal"
+            }
+        ]
+
+        await betsAdapter.addGame(games[0].team1,games[0].team2);
+        await betsAdapter.addGame(games[1].team1,games[1].team2);
+        const value : bigint = ethers.parseEther('1');
+
+        const instance = betsAdapter.connect(account1);
+
+        await expect(instance.makeBet(0,0,{value : value})).to.revertedWith('Invalid bet: the value must be exactly 0.01 ether');
+
+    }) 
+
+    
+    it('make Bet  (error : Game Finished)',async () =>{
+        const { bets, betsAdapter , owner, account1 , account2 } = await deployFixture();
+        //console.log(bets.target)
+        await betsAdapter.setProvider(bets.target);
+        const games : TeamInterface[] = [
+            {
+                team1 : "Barcelona",
+                team2 : "Real Madrid"
+            },
+            {
+                team1 : "Manchester City",
+                team2 : "Arsenal"
+            }
+        ]
+
+        await betsAdapter.addGame(games[0].team1,games[0].team2);
+        await betsAdapter.addGame(games[1].team1,games[1].team2);
+        await betsAdapter.finalizeBet(0,0);
+        const value : bigint = ethers.parseEther('0.01');
+
+        const instance = betsAdapter.connect(account1);
+
+        await expect(instance.makeBet(0,0,{value : value})).to.revertedWith('Game Finished');
+
+    })
+
+    it('make Bet  (error : Bet already placed)',async () =>{
+        const { bets, betsAdapter , owner, account1 , account2 } = await deployFixture();
+        //console.log(bets.target)
+        await betsAdapter.setProvider(bets.target);
+        const games : TeamInterface[] = [
+            {
+                team1 : "Barcelona",
+                team2 : "Real Madrid"
+            },
+            {
+                team1 : "Manchester City",
+                team2 : "Arsenal"
+            }
+        ]
+
+        await betsAdapter.addGame(games[0].team1,games[0].team2);
+        await betsAdapter.addGame(games[1].team1,games[1].team2);
+        const value : bigint = ethers.parseEther('0.01');
+        const instance = betsAdapter.connect(account1);
+        await instance.makeBet(0,0,{value : value});
+
+        await expect(instance.makeBet(0,1,{value : value})).to.revertedWith('Bet already placed');
+
+    })
+
+    it('finalize Bet  (success)',async () =>{
+        const { bets, betsAdapter , owner, account1 , account2 } = await deployFixture();
+        //console.log(bets.target)
+        await betsAdapter.setProvider(bets.target);
+        const games : TeamInterface[] = [
+            {
+                team1 : "Barcelona",
+                team2 : "Real Madrid"
+            },
+            {
+                team1 : "Manchester City",
+                team2 : "Arsenal"
+            }
+        ]
+
+        await betsAdapter.addGame(games[0].team1,games[0].team2);
+        await betsAdapter.addGame(games[1].team1,games[1].team2);
+        const value : bigint = ethers.parseEther('0.01');
+        
+        const bet1 =  betsAdapter.connect(account1);
+        const bet2 =  betsAdapter.connect(account2);
+
+
+
+        await bet1.makeBet(0,0,{value : value});
+        await bet2.makeBet(0,1,{value : value});
+
+        await betsAdapter.finalizeBet(0,0);
+
+
+        const game1 = await betsAdapter.getGame(0);
+
+
+        expect(game1.finished).to.equal(true);
+        expect(game1.status).to.equal(games[0].team1);
+
+    })
+
+    it('finalize Bet  (error : Game Finished)',async () =>{
+        const { bets, betsAdapter , owner, account1 , account2 } = await deployFixture();
+        //console.log(bets.target)
+        await betsAdapter.setProvider(bets.target);
+        const games : TeamInterface[] = [
+            {
+                team1 : "Barcelona",
+                team2 : "Real Madrid"
+            },
+            {
+                team1 : "Manchester City",
+                team2 : "Arsenal"
+            }
+        ]
+
+        await betsAdapter.addGame(games[0].team1,games[0].team2);
+        await betsAdapter.addGame(games[1].team1,games[1].team2);
+        const value : bigint = ethers.parseEther('0.01');
+        
+        const bet1 =  betsAdapter.connect(account1);
+        const bet2 =  betsAdapter.connect(account2);
+
+
+
+        await bet1.makeBet(0,0,{value : value});
+        await bet2.makeBet(0,1,{value : value});
+
+        await betsAdapter.finalizeBet(0,0);
+
+
+        const game1 = await betsAdapter.getGame(0);
+
+
+        expect(game1.finished).to.equal(true);
+        expect(game1.status).to.equal(games[0].team1);
+        await expect(betsAdapter.finalizeBet(0,1)).to.rejectedWith('Game Finished');
+
+    })
 
 
     

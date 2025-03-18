@@ -18,12 +18,12 @@ contract Bets  is IBets{
     }
 
     modifier  Authorization(){
-        require(tx.origin == owner,"Acesso Negado");
+        require(tx.origin == owner,"Access denied");
         _;
     }
 
     modifier findGame(uint32 id){
-        require(id <= index-1,"Jogo nao encontrado");
+        require(id <= index-1,"Game not found");
         _;
     }
 
@@ -38,7 +38,7 @@ contract Bets  is IBets{
             team1:_team1,
             team2:_team2,
             finished:false,
-            status:"Partida nao realizada"
+            status:"Match not held"
         });
         index+=1;
 
@@ -76,11 +76,11 @@ contract Bets  is IBets{
 
     function makeBet(uint32 id,BetsLibrary.Choice team) external payable  findGame(id) {
         
-        require(tx.origin != owner,"Proprietario nao Pode Jogar");
-        require(msg.value == 0.01 ether,"Aposta invalida: o valor deve ser exatamente 0.01 ether");
+        require(tx.origin != owner,"Owner Cannot Play");
+        require(msg.value == 0.01 ether,"Invalid bet: the value must be exactly 0.01 ether");
         BetsLibrary.Game memory game = games[id];
 
-        require(game.finished == false,"Jogo Finalizado");
+        require(game.finished == false,"Game Finished");
 
         BetsLibrary.Gambler memory gambler = BetsLibrary.Gambler({
             wallet:tx.origin,
@@ -95,7 +95,7 @@ contract Bets  is IBets{
         else{
             for(uint32 i = 0; i <= bettors[id].length-1 ; i++){
                 if(bettors[id][i].wallet == tx.origin){
-                    revert("Aposta ja Realizada");
+                    revert("Bet already placed");
                 }
             }
         }
@@ -107,7 +107,7 @@ contract Bets  is IBets{
     function finalizeBet(uint32 id, BetsLibrary.Choice winningTeam) 
         external Authorization findGame(id)
     {
-        require(games[id].finished == false, "Jogo Finalizado");
+        require(games[id].finished == false, "Game Finished");
         games[id].finished = true;
 
         if (uint(winningTeam) == 0) {

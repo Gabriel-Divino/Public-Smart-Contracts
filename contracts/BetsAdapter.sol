@@ -8,11 +8,12 @@ import "./IBets.sol";
 contract BetsAdapter is IBets{
 
     IBets private provider;
-    address public immutable owner;
+    address private immutable owner;
 
     constructor(){
         owner = msg.sender;
     }
+
 
     modifier onlyOwner(){
         require(msg.sender == owner,"Access denied");
@@ -23,6 +24,11 @@ contract BetsAdapter is IBets{
         require(address(provider) != address(0),"Invalid Contract");
         _;
     }
+
+    function getOwner() external view returns(address){
+        return owner;
+    }
+
     
     function setProvider(address newContract) external onlyOwner(){
         require(newContract != address(0),"Invalid Contract");
