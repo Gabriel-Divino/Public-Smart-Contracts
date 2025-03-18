@@ -3,7 +3,8 @@ pragma solidity ^0.8.28;
 import "./BetsLibrary.sol";
 import "./IBets.sol";
 
-
+//endereço do contrato : 0x125C356910F27FdafbB3e67A608378D5C6A97d0A
+//https://holesky.etherscan.io/address/0x125C356910F27FdafbB3e67A608378D5C6A97d0A
 
 contract BetsAdapter is IBets{
 
