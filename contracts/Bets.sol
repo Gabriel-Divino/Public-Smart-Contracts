@@ -4,7 +4,9 @@ import "./BetsLibrary.sol";
 import "./IBets.sol";
 
 //endereço do contrato : 0x1d198681971329c2Bf6E624E1Fb2578cdb011c3C
+//Novo Endereço do Contrato : 0xF75FFB62Eb2f4606615cbb37E3a1dE69693B8523
 //https://holesky.etherscan.io/address/0x1d198681971329c2Bf6E624E1Fb2578cdb011c3C#code
+//Novo Link do Contrato : https://holesky.etherscan.io/address/0xF75FFB62Eb2f4606615cbb37E3a1dE69693B8523#code
 
 contract Bets  is IBets{
 
@@ -14,6 +16,9 @@ contract Bets  is IBets{
     mapping(uint32 => BetsLibrary.Gambler[]) private bettors;
 
     address private immutable owner;
+
+    event Played(address indexed player,uint32 gameId,string  team);
+    event GameFinished(uint32 gameId,string winningTeam);
 
     constructor(){
         owner = tx.origin;
@@ -102,21 +107,39 @@ contract Bets  is IBets{
             }
         }
 
+
+        string memory chosenTeam;
+        if(team == BetsLibrary.Choice.team1){
+            chosenTeam = game.team1;
+        }else{
+            chosenTeam = game.team2;
+        }
+
         bettors[id].push(gambler);
+        emit Played(msg.sender,id,chosenTeam);
 
     }
 
     function finalizeBet(uint32 id, BetsLibrary.Choice winningTeam) 
         external Authorization findGame(id)
     {
-        require(games[id].finished == false, "Game Finished");
-        games[id].finished = true;
+
+        BetsLibrary.Game memory _game = games[id];
+        require(_game.finished == false, "Game Finished");
+        _game.finished = true;
+
+        
+        string memory _winningTeam;
 
         if (uint(winningTeam) == 0) {
-            games[id].status = games[id].team1;
+            _game.status = _game.team1;
+            _winningTeam = _game.team1;
         } else {
-            games[id].status = games[id].team2;
+            _game.status = _game.team2;
+            _winningTeam = _game.team2;
         }
+
+        games[id] = _game;
 
         // Determina os vencedores
         uint256 totalBet;
@@ -144,6 +167,7 @@ contract Bets  is IBets{
 
         // Transfere 10% para o proprietário
         payable(owner).transfer(ownerShare);
+        emit GameFinished(id, _winningTeam);
     }
 
 

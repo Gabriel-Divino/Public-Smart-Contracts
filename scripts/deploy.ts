@@ -11,17 +11,17 @@ async function Euro2(){
 
 async function Bets() {
 
-    const betsAdapter = await ethers.deployContract('BetsAdapter');
+    /*const betsAdapter = await ethers.deployContract('BetsAdapter');
     await betsAdapter.waitForDeployment();
-    console.log(`Endereço do contrato : ${betsAdapter.target}`);
+    console.log(`Endereço do contrato : ${betsAdapter.target}`);*/
 
     const bets = await ethers.deployContract('Bets');
     await bets.waitForDeployment();
     console.log(`Endereço do contrato : ${bets.target}`);
 
-    await betsAdapter.setProvider(bets.target);
+    /*await betsAdapter.setProvider(bets.target);
     const provider = await betsAdapter.getProvider();
-    console.log(`endereço do provider : ${provider}`);
+    console.log(`endereço do provider : ${provider}`);*/
 }
 
 Bets().catch((err)=>{
